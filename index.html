@@ -1,3 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>STOCK MANAGER PRO</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f4f4f4; }
+    h1 { text-align: center; }
+    input, button { padding: 10px; margin: 5px 0; width: 100%; }
+    .product { background: white; padding: 10px; margin-top: 10px; border-radius: 5px; }
+    .product button { width: auto; margin-left: 10px; }
+  </style>
+</head>
+<body>
+
+<h1>STOCK MANAGER PRO</h1>
+
+<input type="text" id="name" placeholder="Product name">
+<input type="number" id="quantity" placeholder="Quantity">
+<input type="number" id="price" placeholder="Price (€)">
+<button onclick="addProduct()">Add Product</button>
+
+<!-- Qui compare il valore totale -->
+<div id="totalValue" style="font-weight:bold; margin-top:10px;"></div>
+
+<!-- Lista prodotti -->
+<div id="productList"></div>
+
 <script>
   let products = JSON.parse(localStorage.getItem('products') || "[]");
 
@@ -52,3 +81,6 @@
 
   renderProducts();
 </script>
+
+</body>
+</html>
