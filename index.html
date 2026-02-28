@@ -1,127 +1,179 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>STOCK MANAGER PRO</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: Arial; padding: 20px; background: #f4f4f4; }
-    h1 { text-align: center; }
-    input, select, button { padding: 10px; margin: 5px 0; width: 100%; }
-    .product { background: white; padding: 10px; margin-top: 10px; border-radius: 5px; }
-    .product button { width: auto; margin-top: 5px; }
-  </style>
+<meta charset="UTF-8">
+<title>STOCK MANAGER PRO</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #eee;
+    padding: 20px;
+  }
+
+  h1 {
+    text-align: center;
+  }
+
+  .form {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  input, select, button {
+    padding: 8px;
+    font-size: 14px;
+  }
+
+  button {
+    cursor: pointer;
+    background: #4caf50;
+    border: none;
+    color: white;
+  }
+
+  .product {
+    background: #222;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+  }
+
+  .low-stock {
+    background: #442222;
+  }
+
+  #totalValue {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+  }
+</style>
 </head>
+
 <body>
 
 <h1>STOCK MANAGER PRO</h1>
 
-<input type="text" id="name" placeholder="Product name">
+<div class="form">
+  <input id="name" placeholder="Product name">
 
-<select id="unit">
-  <option value="pcs">Pieces (pcs)</option>
-  <option value="ctn">Cartons (ctn)</option>
-  <option value="kg">Kilograms (kg)</option>
-  <option value="g">Grams (g)</option>
-  <option value="lb">Pounds (lb)</option>
-  <option value="oz">Ounces (oz)</option>
-</select>
+  <input id="quantity" placeholder="Quantity">
 
-<input type="text" id="quantity" placeholder="Quantity">
-<input type="text" id="price" placeholder="Price (€)">
-<button onclick="addProduct()">Add Product</button>
+  <select id="unit">
+    <option value="pcs" selected>pcs</option>
+    <option value="ctn">ctn</option>
+    <option value="kg">kg</option>
+    <option value="lb">lb</option>
+    <option value="oz">oz</option>
+  </select>
 
-<div id="totalValue" style="font-weight:bold; margin-top:10px;"></div>
+  <input id="price" placeholder="Price (€)">
+
+  <button onclick="addProduct()">Add Product</button>
+</div>
+
 <div id="productList"></div>
 
+<div id="totalValue"></div>
+
 <script>
-  function formatPrice(n) {
-    return new Intl.NumberFormat('it-IT', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(n);
+let products = JSON.parse(localStorage.getItem('products') || "[]");
+
+function cleanNumber(value, allowDecimal = true) {
+  value = value.trim().replace(/\s/g, '');
+
+  if (allowDecimal) {
+    value = value.replace(/\./g, '');
+    value = value.replace(',', '.');
+  } else {
+    value = value.replace(/\D/g, '');
   }
 
-  function formatQuantity(qty, unit) {
-    if (unit === "pcs" || unit === "ctn") {
-      return new Intl.NumberFormat('it-IT', { maximumFractionDigits: 0 }).format(qty);
-    } else {
-      return new Intl.NumberFormat('it-IT', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(qty);
-    }
-  }
+  return value;
+}
 
-  let products = JSON.parse(localStorage.getItem('products') || "[]");
+function formatNumber(value, decimals) {
+  return new Intl.NumberFormat('it-IT', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  }).format(value);
+}
 
-  function renderProducts() {
-    const list = document.getElementById('productList');
-    list.innerHTML = "";
-    let totalValue = 0;
+function renderProducts() {
+  const list = document.getElementById('productList');
+  list.innerHTML = "";
 
-    products.forEach((p, i) => {
-      const qty = Number(p.quantity);
-      const price = Number(p.price);
-      const value = qty * price;
-      totalValue += value;
+  let totalValue = 0;
 
-      const div = document.createElement('div');
-      div.className = "product";
+  products.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = "product";
 
-      if ((p.unit === "pcs" || p.unit === "ctn") && qty < 5) {
-        div.style.background = "#ffdddd";
-      }
-
-      div.innerHTML = `
-        <strong>${p.name}</strong><br>
-        Quantity: ${formatQuantity(qty, p.unit)} ${p.unit}<br>
-        Price: €${formatPrice(price)}<br>
-        Value: €${formatPrice(value)}<br>
-        <button onclick="deleteProduct(${i})">Delete</button>
-      `;
-
-      list.appendChild(div);
-    });
-
-    document.getElementById('totalValue').innerText =
-      "Total Inventory Value: €" + formatPrice(totalValue);
-  }
-
-  function addProduct() {
-    const name = document.getElementById('name').value.trim();
-    const unit = document.getElementById('unit').value;
-
-    const quantityRaw = document.getElementById('quantity').value.trim().replace(',', '.');
-    const priceRaw = document.getElementById('price').value.trim().replace(',', '.');
-
-    let quantity = (unit === "pcs" || unit === "ctn")
-      ? parseInt(quantityRaw)
-      : parseFloat(quantityRaw);
-
-    const price = parseFloat(priceRaw);
-
-    if (!name || isNaN(quantity) || isNaN(price)) {
-      alert("Please insert valid data.");
-      return;
+    if ((p.unit === "pcs" || p.unit === "ctn") && p.quantity < 5) {
+      div.classList.add("low-stock");
     }
 
-    products.push({ name, unit, quantity, price });
-    localStorage.setItem('products', JSON.stringify(products));
-    renderProducts();
+    const value = p.quantity * p.price;
+    totalValue += value;
 
-    document.getElementById('name').value = "";
-    document.getElementById('quantity').value = "";
-    document.getElementById('price').value = "";
+    const qtyDecimals = (p.unit === "pcs" || p.unit === "ctn") ? 0 : 2;
+
+    div.innerHTML = `
+      <strong>${p.name}</strong><br>
+      Quantity: ${formatNumber(p.quantity, qtyDecimals)} ${p.unit}<br>
+      Price: €${formatNumber(p.price, 2)}<br>
+      Value: €${formatNumber(value, 2)}
+      <br>
+      <button onclick="deleteProduct(${i})">Delete</button>
+    `;
+
+    list.appendChild(div);
+  });
+
+  document.getElementById('totalValue').innerText =
+    "Total Inventory Value: €" + formatNumber(totalValue, 2);
+}
+
+function addProduct() {
+  const name = document.getElementById('name').value.trim();
+  const unit = document.getElementById('unit').value;
+
+  const quantityInput = document.getElementById('quantity').value;
+  const priceInput = document.getElementById('price').value;
+
+  const allowDecimal = !(unit === "pcs" || unit === "ctn");
+
+  const quantityClean = cleanNumber(quantityInput, allowDecimal);
+  const priceClean = cleanNumber(priceInput, true);
+
+  const quantity = allowDecimal ? parseFloat(quantityClean) : parseInt(quantityClean);
+  const price = parseFloat(priceClean);
+
+  if (!name || isNaN(quantity) || isNaN(price)) {
+    alert("Please insert valid data.");
+    return;
   }
 
-  function deleteProduct(index) {
-    products.splice(index, 1);
-    localStorage.setItem('products', JSON.stringify(products));
-    renderProducts();
-  }
-
+  products.push({ name, unit, quantity, price });
+  localStorage.setItem('products', JSON.stringify(products));
   renderProducts();
+
+  document.getElementById('name').value = "";
+  document.getElementById('quantity').value = "";
+  document.getElementById('price').value = "";
+}
+
+function deleteProduct(index) {
+  products.splice(index, 1);
+  localStorage.setItem('products', JSON.stringify(products));
+  renderProducts();
+}
+
+renderProducts();
 </script>
 
 </body>
