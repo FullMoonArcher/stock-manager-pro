@@ -49,13 +49,13 @@
 
       div.innerHTML = `<strong>${p.name}</strong><br>
                        Quantity: ${p.quantity}<br>
-                       Price: €${p.price} <br>
-                       Value: €${value.toFixed(2)} 
+                       Price: €${Number(p.price).toLocaleString('it-IT', {minimumFractionDigits:2, maximumFractionDigits:2})} <br>
+                       Value: €${value.toLocaleString('it-IT', {minimumFractionDigits:2, maximumFractionDigits:2})} 
                        <button onclick="deleteProduct(${i})">Delete</button>`;
       list.appendChild(div);
     });
 
-    document.getElementById('totalValue').innerText = "Total Inventory Value: €" + totalValue.toFixed(2);
+    document.getElementById('totalValue').innerText = "Total Inventory Value: €" + totalValue.toLocaleString('it-IT', {minimumFractionDigits:2, maximumFractionDigits:2});
   }
 
   function addProduct() {
