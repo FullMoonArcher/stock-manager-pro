@@ -25,7 +25,6 @@
 <div id="productList"></div>
 
 <script>
-  // funzione per formattare i numeri in stile italiano
   function formatIT(n) {
     return new Intl.NumberFormat('it-IT', {
       minimumFractionDigits: 2,
@@ -55,37 +54,4 @@
                        Quantity: ${qty}<br>
                        Price: €${formatIT(price)}<br>
                        Value: €${formatIT(value)}
-                       <button onclick="deleteProduct(${i})">Delete</button>`;
-      list.appendChild(div);
-    });
-
-    document.getElementById('totalValue').innerText =
-      "Total Inventory Value: €" + formatIT(totalValue);
-  }
-
-  function addProduct() {
-    const name = document.getElementById('name').value;
-    const quantity = document.getElementById('quantity').value;
-    const price = document.getElementById('price').value;
-    if (!name || !quantity || !price) return;
-
-    products.push({name, quantity, price});
-    localStorage.setItem('products', JSON.stringify(products));
-    renderProducts();
-
-    document.getElementById('name').value = "";
-    document.getElementById('quantity').value = "";
-    document.getElementById('price').value = "";
-  }
-
-  function deleteProduct(index) {
-    products.splice(index,1);
-    localStorage.setItem('products', JSON.stringify(products));
-    renderProducts();
-  }
-
-  renderProducts();
-</script>
-
-</body>
-</html>
+                       <button onclick="delete
