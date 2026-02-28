@@ -19,7 +19,8 @@
 <input type="text" id="name" placeholder="Product name">
 
 <select id="unit">
-  <option value="pieces">Pieces</option>
+  <option value="pcs">Pieces (pcs)</option>
+  <option value="ctn">Cartons (ctn)</option>
   <option value="kg">Kilograms (kg)</option>
   <option value="g">Grams (g)</option>
   <option value="lb">Pounds (lb)</option>
@@ -42,10 +43,8 @@
   }
 
   function formatQuantity(qty, unit) {
-    if(unit === "pieces") {
-      return new Intl.NumberFormat('it-IT', {
-        maximumFractionDigits: 0
-      }).format(qty);
+    if (unit === "pcs" || unit === "ctn") {
+      return new Intl.NumberFormat('it-IT', { maximumFractionDigits: 0 }).format(qty);
     } else {
       return new Intl.NumberFormat('it-IT', {
         minimumFractionDigits: 2,
@@ -62,7 +61,6 @@
     let totalValue = 0;
 
     products.forEach((p, i) => {
-
       const qty = Number(p.quantity);
       const price = Number(p.price);
       const value = qty * price;
@@ -71,7 +69,7 @@
       const div = document.createElement('div');
       div.className = "product";
 
-      if (p.unit === "pieces" && qty < 5) {
+      if ((p.unit === "pcs" || p.unit === "ctn") && qty < 5) {
         div.style.background = "#ffdddd";
       }
 
@@ -94,23 +92,14 @@
     const name = document.getElementById('name').value.trim();
     const unit = document.getElementById('unit').value;
 
-    const quantityInput = document.getElementById('quantity')
-      .value.trim()
-      .replace(',', '.');
+    const quantityRaw = document.getElementById('quantity').value.trim().replace(',', '.');
+    const priceRaw = document.getElementById('price').value.trim().replace(',', '.');
 
-    const priceInput = document.getElementById('price')
-      .value.trim()
-      .replace(',', '.');
+    let quantity = (unit === "pcs" || unit === "ctn")
+      ? parseInt(quantityRaw)
+      : parseFloat(quantityRaw);
 
-    let quantity;
-
-    if(unit === "pieces") {
-      quantity = parseInt(quantityInput);
-    } else {
-      quantity = parseFloat(quantityInput);
-    }
-
-    const price = parseFloat(priceInput);
+    const price = parseFloat(priceRaw);
 
     if (!name || isNaN(quantity) || isNaN(price)) {
       alert("Please insert valid data.");
@@ -118,9 +107,7 @@
     }
 
     products.push({ name, unit, quantity, price });
-
     localStorage.setItem('products', JSON.stringify(products));
-
     renderProducts();
 
     document.getElementById('name').value = "";
