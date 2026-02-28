@@ -7,9 +7,9 @@
   <style>
     body { font-family: Arial; padding: 20px; background: #f4f4f4; }
     h1 { text-align: center; }
-    input, button { padding: 10px; margin: 5px 0; width: 100%; }
+    input, select, button { padding: 10px; margin: 5px 0; width: 100%; }
     .product { background: white; padding: 10px; margin-top: 10px; border-radius: 5px; }
-    .product button { width: auto; margin-left: 10px; }
+    .product button { width: auto; margin-top: 5px; }
   </style>
 </head>
 <body>
@@ -17,7 +17,11 @@
 <h1>STOCK MANAGER PRO</h1>
 
 <input type="text" id="name" placeholder="Product name">
-<input type="number" id="quantity" placeholder="Quantity">
+<select id="unit">
+  <option value="pz">Pezzi (pz)</option>
+  <option value="kg">Chilogrammi (kg)</option>
+</select>
+<input type="text" id="quantity" placeholder="Quantity">
 <input type="text" id="price" placeholder="Price (€)">
 <button onclick="addProduct()">Add Product</button>
 
@@ -25,70 +29,8 @@
 <div id="productList"></div>
 
 <script>
-  function formatIT(n) {
+  function formatPrice(n) {
     return new Intl.NumberFormat('it-IT', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    }).format(n);
-  }
-
-  let products = JSON.parse(localStorage.getItem('products') || "[]");
-
-  function renderProducts() {
-    const list = document.getElementById('productList');
-    list.innerHTML = "";
-    let totalValue = 0;
-
-    products.forEach((p, i) => {
-      const qty = Number(p.quantity);
-      const price = Number(p.price);
-      const value = qty * price;
-      totalValue += value;
-
-      const div = document.createElement('div');
-      div.className = "product";
-
-      if (qty < 5) div.style.background = "#ffdddd";
-
-      div.innerHTML = `<strong>${p.name}</strong><br>
-                       Quantity: ${qty}<br>
-                       Price: €${formatIT(price)}<br>
-                       Value: €${formatIT(value)}
-                       <button onclick="deleteProduct(${i})">Delete</button>`;
-      list.appendChild(div);
-    });
-
-    document.getElementById('totalValue').innerText =
-      "Total Inventory Value: €" + formatIT(totalValue);
-  }
-
-  function addProduct() {
-    const name = document.getElementById('name').value.trim();
-    const quantity = parseInt(document.getElementById('quantity').value.trim());
-    const price = parseFloat(document.getElementById('price').value.trim().replace(',', '.'));
-
-    if (!name || isNaN(quantity) || isNaN(price)) {
-      alert("Inserisci nome, quantità e prezzo validi!");
-      return;
-    }
-
-    products.push({name, quantity, price});
-    localStorage.setItem('products', JSON.stringify(products));
-    renderProducts();
-
-    document.getElementById('name').value = "";
-    document.getElementById('quantity').value = "";
-    document.getElementById('price').value = "";
-  }
-
-  function deleteProduct(index) {
-    products.splice(index,1);
-    localStorage.setItem('products', JSON.stringify(products));
-    renderProducts();
-  }
-
-  renderProducts();
-</script>
-
-</body>
-</html>
+    }).format
