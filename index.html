@@ -21,13 +21,18 @@
 <input type="number" id="price" placeholder="Price (€)">
 <button onclick="addProduct()">Add Product</button>
 
-<!-- Qui compare il valore totale -->
 <div id="totalValue" style="font-weight:bold; margin-top:10px;"></div>
-
-<!-- Lista prodotti -->
 <div id="productList"></div>
 
 <script>
+  // funzione per formattare i numeri in stile italiano
+  function formatIT(n) {
+    return new Intl.NumberFormat('it-IT', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(n);
+  }
+
   let products = JSON.parse(localStorage.getItem('products') || "[]");
 
   function renderProducts() {
@@ -36,26 +41,26 @@
     let totalValue = 0;
 
     products.forEach((p, i) => {
+      const qty = Number(p.quantity);
+      const price = Number(p.price);
+      const value = qty * price;
+      totalValue += value;
+
       const div = document.createElement('div');
       div.className = "product";
 
-      // Evidenzia prodotti con scorte basse (<5)
-      if (Number(p.quantity) < 5) {
-        div.style.background = "#ffdddd";
-      }
-
-      const value = Number(p.quantity) * Number(p.price);
-      totalValue += value;
+      if (qty < 5) div.style.background = "#ffdddd";
 
       div.innerHTML = `<strong>${p.name}</strong><br>
-                       Quantity: ${p.quantity}<br>
-                       Price: €${Number(p.price).toLocaleString('it-IT', {minimumFractionDigits:2, maximumFractionDigits:2})} <br>
-                       Value: €${value.toLocaleString('it-IT', {minimumFractionDigits:2, maximumFractionDigits:2})} 
+                       Quantity: ${qty}<br>
+                       Price: €${formatIT(price)}<br>
+                       Value: €${formatIT(value)}
                        <button onclick="deleteProduct(${i})">Delete</button>`;
       list.appendChild(div);
     });
 
-    document.getElementById('totalValue').innerText = "Total Inventory Value: €" + totalValue.toLocaleString('it-IT', {minimumFractionDigits:2, maximumFractionDigits:2});
+    document.getElementById('totalValue').innerText =
+      "Total Inventory Value: €" + formatIT(totalValue);
   }
 
   function addProduct() {
