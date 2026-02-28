@@ -1,44 +1,32 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>STOCK MANAGER PRO</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: Arial; padding: 20px; background: #f4f4f4; }
-    h1 { text-align: center; }
-    input, button { padding: 10px; margin: 5px 0; width: 100%; }
-    .product { background: white; padding: 10px; margin-top: 10px; border-radius: 5px; }
-    .product button { width: auto; margin-left: 10px; }
-  </style>
-</head>
-<body>
-
-<h1>STOCK MANAGER PRO</h1>
-
-<input type="text" id="name" placeholder="Product name">
-<input type="number" id="quantity" placeholder="Quantity">
-<input type="number" id="price" placeholder="Price (€)">
-
-<button onclick="addProduct()">Add Product</button>
-
-<div id="productList"></div>
-
 <script>
-  // Carica prodotti dal localStorage
   let products = JSON.parse(localStorage.getItem('products') || "[]");
 
   function renderProducts() {
     const list = document.getElementById('productList');
     list.innerHTML = "";
+    let totalValue = 0;
+
     products.forEach((p, i) => {
       const div = document.createElement('div');
       div.className = "product";
+
+      // Evidenzia prodotti con scorte basse (<5)
+      if (Number(p.quantity) < 5) {
+        div.style.background = "#ffdddd";
+      }
+
+      const value = Number(p.quantity) * Number(p.price);
+      totalValue += value;
+
       div.innerHTML = `<strong>${p.name}</strong><br>
                        Quantity: ${p.quantity}<br>
-                       Price: €${p.price} <button onclick="deleteProduct(${i})">Delete</button>`;
+                       Price: €${p.price} <br>
+                       Value: €${value.toFixed(2)} 
+                       <button onclick="deleteProduct(${i})">Delete</button>`;
       list.appendChild(div);
     });
+
+    document.getElementById('totalValue').innerText = "Total Inventory Value: €" + totalValue.toFixed(2);
   }
 
   function addProduct() {
@@ -64,6 +52,3 @@
 
   renderProducts();
 </script>
-
-</body>
-</html>
