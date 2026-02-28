@@ -18,7 +18,7 @@
 
 <input type="text" id="name" placeholder="Product name">
 <input type="number" id="quantity" placeholder="Quantity">
-<input type="number" id="price" placeholder="Price (€)">
+<input type="text" id="price" placeholder="Price (€)">
 <button onclick="addProduct()">Add Product</button>
 
 <div id="totalValue" style="font-weight:bold; margin-top:10px;"></div>
@@ -64,15 +64,18 @@
   }
 
   function addProduct() {
-    const name = document.getElementById('name').value;
+    const name = document.getElementById('name').value.trim();
+    const quantityStr = document.getElementById('quantity').value.trim();
+    const priceStr = document.getElementById('price').value.trim().replace(',', '.');
 
-    // Converti quantity e price in numeri “puliti”
-    let quantity = parseInt(document.getElementById('quantity').value);
-    let price = parseFloat(document.getElementById('price').value.toString().replace(',', '.'));
+    const quantity = parseInt(quantityStr);
+    const price = parseFloat(priceStr);
 
-    if (!name || isNaN(quantity) || isNaN(price)) return;
+    if (!name || isNaN(quantity) || isNaN(price)) {
+      alert("Inserisci nome, quantità e prezzo validi!");
+      return;
+    }
 
-    // Salviamo i valori come numeri, non stringhe
     products.push({name, quantity, price});
     localStorage.setItem('products', JSON.stringify(products));
     renderProducts();
