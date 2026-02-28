@@ -25,7 +25,7 @@
 <div id="productList"></div>
 
 <script>
-  // Funzione per formattare i numeri in stile italiano
+  // Formatta numeri in stile italiano
   function formatIT(n) {
     return new Intl.NumberFormat('it-IT', {
       minimumFractionDigits: 2,
@@ -90,6 +90,15 @@
     localStorage.setItem('products', JSON.stringify(products));
     renderProducts();
   }
+
+  // Formattazione automatica del prezzo quando si esce dal campo
+  document.getElementById('price').addEventListener('blur', function() {
+    let val = this.value.replace(',', '.');
+    let num = parseFloat(val);
+    if (!isNaN(num)) {
+      this.value = formatIT(num);
+    }
+  });
 
   renderProducts();
 </script>
