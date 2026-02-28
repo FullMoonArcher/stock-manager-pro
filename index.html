@@ -17,10 +17,15 @@
 <h1>STOCK MANAGER PRO</h1>
 
 <input type="text" id="name" placeholder="Product name">
+
 <select id="unit">
-  <option value="pz">Pezzi (pz)</option>
-  <option value="kg">Chilogrammi (kg)</option>
+  <option value="pieces">Pieces</option>
+  <option value="kg">Kilograms (kg)</option>
+  <option value="g">Grams (g)</option>
+  <option value="lb">Pounds (lb)</option>
+  <option value="oz">Ounces (oz)</option>
 </select>
+
 <input type="text" id="quantity" placeholder="Quantity">
 <input type="text" id="price" placeholder="Price (€)">
 <button onclick="addProduct()">Add Product</button>
@@ -33,4 +38,104 @@
     return new Intl.NumberFormat('it-IT', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    }).format
+    }).format(n);
+  }
+
+  function formatQuantity(qty, unit) {
+    if(unit === "pieces") {
+      return new Intl.NumberFormat('it-IT', {
+        maximumFractionDigits: 0
+      }).format(qty);
+    } else {
+      return new Intl.NumberFormat('it-IT', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(qty);
+    }
+  }
+
+  let products = JSON.parse(localStorage.getItem('products') || "[]");
+
+  function renderProducts() {
+    const list = document.getElementById('productList');
+    list.innerHTML = "";
+    let totalValue = 0;
+
+    products.forEach((p, i) => {
+
+      const qty = Number(p.quantity);
+      const price = Number(p.price);
+      const value = qty * price;
+      totalValue += value;
+
+      const div = document.createElement('div');
+      div.className = "product";
+
+      if (p.unit === "pieces" && qty < 5) {
+        div.style.background = "#ffdddd";
+      }
+
+      div.innerHTML = `
+        <strong>${p.name}</strong><br>
+        Quantity: ${formatQuantity(qty, p.unit)} ${p.unit}<br>
+        Price: €${formatPrice(price)}<br>
+        Value: €${formatPrice(value)}<br>
+        <button onclick="deleteProduct(${i})">Delete</button>
+      `;
+
+      list.appendChild(div);
+    });
+
+    document.getElementById('totalValue').innerText =
+      "Total Inventory Value: €" + formatPrice(totalValue);
+  }
+
+  function addProduct() {
+    const name = document.getElementById('name').value.trim();
+    const unit = document.getElementById('unit').value;
+
+    const quantityInput = document.getElementById('quantity')
+      .value.trim()
+      .replace(',', '.');
+
+    const priceInput = document.getElementById('price')
+      .value.trim()
+      .replace(',', '.');
+
+    let quantity;
+
+    if(unit === "pieces") {
+      quantity = parseInt(quantityInput);
+    } else {
+      quantity = parseFloat(quantityInput);
+    }
+
+    const price = parseFloat(priceInput);
+
+    if (!name || isNaN(quantity) || isNaN(price)) {
+      alert("Please insert valid data.");
+      return;
+    }
+
+    products.push({ name, unit, quantity, price });
+
+    localStorage.setItem('products', JSON.stringify(products));
+
+    renderProducts();
+
+    document.getElementById('name').value = "";
+    document.getElementById('quantity').value = "";
+    document.getElementById('price').value = "";
+  }
+
+  function deleteProduct(index) {
+    products.splice(index, 1);
+    localStorage.setItem('products', JSON.stringify(products));
+    renderProducts();
+  }
+
+  renderProducts();
+</script>
+
+</body>
+</html>
