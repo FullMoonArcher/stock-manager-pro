@@ -1,48 +1,40 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Stock Manager Pro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: Arial; padding: 20px; background: #f4f4f4; }
-    h1 { text-align: center; }
-    input, button { padding: 10px; margin: 5px 0; width: 100%; }
-    .product { background: white; padding: 10px; margin-top: 10px; border-radius: 5px; }
-  </style>
-</head>
-<body>
-
-<h1>STOCK MANAGER PRO</h1>
-
-<input type="text" id="name" placeholder="Product name">
-<input type="number" id="quantity" placeholder="Quantity">
-<input type="number" id="price" placeholder="Price">
-
-<button onclick="addProduct()">Add Product</button>
-
-<div id="productList"></div>
-
 <script>
+  // Carica prodotti dal localStorage
+  let products = JSON.parse(localStorage.getItem('products') || "[]");
+
+  function renderProducts() {
+    const list = document.getElementById('productList');
+    list.innerHTML = "";
+    products.forEach((p, i) => {
+      const div = document.createElement('div');
+      div.className = "product";
+      div.innerHTML = `<strong>${p.name}</strong><br>
+                       Quantity: ${p.quantity}<br>
+                       Price: €${p.price} <button onclick="deleteProduct(${i})">Delete</button>`;
+      list.appendChild(div);
+    });
+  }
+
   function addProduct() {
     const name = document.getElementById('name').value;
     const quantity = document.getElementById('quantity').value;
     const price = document.getElementById('price').value;
-
     if (!name) return;
 
-    const productDiv = document.createElement('div');
-    productDiv.className = "product";
-    productDiv.innerHTML = `<strong>${name}</strong><br>
-                            Quantity: ${quantity}<br>
-                            Price: €${price}`;
-
-    document.getElementById('productList').appendChild(productDiv);
+    products.push({name, quantity, price});
+    localStorage.setItem('products', JSON.stringify(products));
+    renderProducts();
 
     document.getElementById('name').value = "";
     document.getElementById('quantity').value = "";
     document.getElementById('price').value = "";
   }
-</script>
 
-</body>
-</html>
+  function deleteProduct(index) {
+    products.splice(index,1);
+    localStorage.setItem('products', JSON.stringify(products));
+    renderProducts();
+  }
+
+  renderProducts();
+</script>
